@@ -1,8 +1,9 @@
-import { ChevronUp } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { v4 as uuid } from "uuid";
+import { motion } from "framer-motion";
+
 import type { LucideIcon } from "lucide-react";
+import { cn } from "../utils";
 
 type DataItem = {
   question: string;
@@ -10,164 +11,105 @@ type DataItem = {
   icon: LucideIcon;
 };
 
-type Item = DataItem & {
-  id: string;
-};
-
-const ExpandedItem = ({
-  item,
-  handleCollapse,
-}: {
-  item: Item;
-  handleCollapse: () => void;
-}) => (
-  <motion.div
-    key={item.id}
-    initial={{ opacity: 0, backgroundColor: "#fff", borderColor: "#fff" }}
-    animate={{ opacity: 1, backgroundColor: "#f8fafc", borderColor: "#e2e8f0" }}
-    exit={{ opacity: 0 }}
-    transition={{
-      type: "spring",
-      mass: 1.5,
-      damping: 12,
-      stiffness: 50,
-    }}
-    onClick={handleCollapse}
-    className="border border-slate-200 bg-slate-50 rounded-4xl py-4 px-6 w-full shadow-xs"
-  >
-    <div className="flex justify-between items-center">
-      <div className="flex items-center gap-x-3">
-        <item.icon className="text-neutral-500" width={24} height={24} />
-        <span className="font-medium text-neutral-900">{item.question}</span>
-      </div>
-      <motion.div
-        initial={{ rotate: 0 }}
-        animate={{ rotate: 180 }}
-        transition={{ duration: 0.4, ease: "easeInOut" }}
-      >
-        <ChevronUp className="text-neutral-500 w-6 h-6" />
-      </motion.div>
-    </div>
-    <motion.p
-      className="pl-9 mt-2 text-neutral-500"
-      initial={{ opacity: 0, y: -5 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -5 }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
-    >
-      {item.answer}
-    </motion.p>
-  </motion.div>
-);
-
-const Item = ({
+const AccordionItem = ({
   item,
   handleExpand,
+  expandedItem,
+  index,
+  isExpanded,
+  lastIndex,
 }: {
-  item: Item;
+  item: DataItem;
   handleExpand: () => void;
-}) => (
-  <div
-    onClick={handleExpand}
-    className="flex justify-between items-center w-full cursor-pointer"
-  >
-    <div className="flex items-center gap-x-3">
-      <item.icon className="text-neutral-500" width={24} height={24} />
-      <span className="font-medium text-neutral-900">{item.question}</span>
-    </div>
-    <ChevronUp className="text-neutral-500 w-6 h-6" />
-  </div>
-);
-
-const Accordion = ({ data }: { data: DataItem[] }) => {
-  const [items] = useState<Item[]>(
-    data.map((item) => ({ ...item, id: uuid() }))
-  );
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
-  const handleExpand = (id: string) => {
-    setExpandedId(id);
-  };
-
-  const expandedItem = items.find((item) => item.id === expandedId);
-  const firstArray = expandedItem
-    ? items.slice(
-        0,
-        items.findIndex((i) => i.id === expandedId)
-      )
-    : items;
-  const secondArray = expandedItem
-    ? items.slice(items.findIndex((i) => i.id === expandedId) + 1)
-    : [];
+  expandedItem: number | null;
+  isExpanded: boolean;
+  index: number;
+  lastIndex: number;
+}) => {
+  const hasExpandedItem = typeof expandedItem === "number";
 
   return (
-    <div className="space-y-2 w-[450px] text-sm">
-      <AnimatePresence mode="wait">
-        {expandedItem ? (
-          <>
-            {firstArray.length > 0 && (
-              <motion.div
-                initial={{ y: 10 }}
-                animate={{ y: 0 }}
-                transition={{
-                  type: "spring",
-                  mass: 1.5,
-                  damping: 12,
-                  stiffness: 100,
-                }}
-                className="bg-white border border-neutral-200 rounded-4xl py-4 px-6 space-y-6 flex flex-col items-start w-full shadow-xs"
-              >
-                {firstArray.map((item) => (
-                  <Item
-                    key={item.id}
-                    item={item}
-                    handleExpand={() => handleExpand(item.id)}
-                  />
-                ))}
-              </motion.div>
-            )}
+    <motion.div
+      onClick={handleExpand}
+      className={cn(
+        "border-slate-200 bg-white py-4 px-6 shadow-xs w-[450px] cursor-pointer border-l border-r",
+        isExpanded && " rounded-4xl border",
+        index === lastIndex && "rounded-b-4xl border-b",
+        index === 0 && "rounded-t-4xl border-t",
+        hasExpandedItem &&
+          expandedItem + 1 === index &&
+          "rounded-t-4xl border-t",
+        hasExpandedItem &&
+          expandedItem - 1 === index &&
+          "rounded-b-4xl border-b"
+      )}
+      initial={false}
+      animate={{
+        backgroundColor: isExpanded
+          ? "rgb(248, 250, 252)"
+          : "rgb(255, 255, 255)",
 
-            <ExpandedItem
-              key={`expanded-${expandedItem.id}`}
-              item={expandedItem}
-              handleCollapse={() => setExpandedId(null)}
-            />
+        marginTop: isExpanded ? (index === 0 ? "0px" : "16px") : "0px",
+        marginBottom: isExpanded ? "16px" : "0px",
+      }}
+      transition={{
+        type: "spring",
+        damping: 9,
+        stiffness: 150,
+        mass: 1.5,
+      }}
+    >
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-x-3">
+          <item.icon className="text-neutral-500" width={24} height={24} />
+          <span className="font-medium text-neutral-900">{item.question}</span>
+        </div>
 
-            {secondArray.length > 0 && (
-              <motion.div
-                initial={{ y: -10 }}
-                animate={{ y: 0 }}
-                transition={{
-                  type: "spring",
-                  mass: 1.5,
-                  damping: 12,
-                  stiffness: 100,
-                }}
-                className="bg-white border border-neutral-200 rounded-4xl py-4 px-6 space-y-6 flex flex-col items-start w-full shadow-xs"
-              >
-                {secondArray.map((item) => (
-                  <Item
-                    key={item.id}
-                    item={item}
-                    handleExpand={() => handleExpand(item.id)}
-                  />
-                ))}
-              </motion.div>
-            )}
-          </>
-        ) : (
-          <div className="bg-white border border-neutral-200 rounded-4xl py-4 px-6 space-y-6 flex flex-col items-start w-full shadow-xs">
-            {items.map((item) => (
-              <Item
-                key={item.id}
-                item={item}
-                handleExpand={() => handleExpand(item.id)}
-              />
-            ))}
-          </div>
+        {!isExpanded && <ChevronDown className="text-neutral-500 w-6 h-6" />}
+        {isExpanded && (
+          <motion.div
+            initial={{ rotate: 0 }}
+            animate={{ rotate: 180 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+          >
+            <ChevronDown className="text-neutral-500 w-6 h-6" />
+          </motion.div>
         )}
-      </AnimatePresence>
-    </div>
+      </div>
+      {isExpanded && (
+        <motion.p
+          className="pl-9 mt-2 text-neutral-500"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+        >
+          {item.answer}
+        </motion.p>
+      )}
+    </motion.div>
+  );
+};
+
+const Accordion = ({ data }: { data: DataItem[] }) => {
+  const [expandedItem, setExpandedItem] = useState<number | null>(null);
+
+  return (
+    <>
+      {data.map((item, index) => (
+        <AccordionItem
+          expandedItem={expandedItem}
+          isExpanded={expandedItem === index}
+          key={index}
+          index={index}
+          lastIndex={data.length - 1}
+          item={item}
+          handleExpand={() =>
+            setExpandedItem((prev) => (prev === index ? null : index))
+          }
+        />
+      ))}
+    </>
   );
 };
 
