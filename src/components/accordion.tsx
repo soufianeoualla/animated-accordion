@@ -42,7 +42,7 @@ const AccordionItem = ({
       initial={false}
       animate={{
         backgroundColor: isExpanded
-          ? "rgb(248, 250, 252)"
+          ? "#FDFDFD"
           : "rgb(255, 255, 255)",
         marginTop: isExpanded ? (index === 0 ? "0px" : "16px") : "0px",
         marginBottom: isExpanded ? "16px" : "0px",
@@ -70,8 +70,8 @@ const AccordionItem = ({
       }}
       transition={{
         type: "spring",
-        damping: 10,
-        stiffness: 100,
+        damping: 16,
+        stiffness: 120,
         mass: 1.5,
       }}
     >
@@ -98,7 +98,7 @@ const AccordionItem = ({
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
         >
           {item.answer}
         </motion.p>
