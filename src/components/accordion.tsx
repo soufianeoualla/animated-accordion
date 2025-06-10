@@ -33,29 +33,45 @@ const AccordionItem = ({
       onClick={handleExpand}
       className={cn(
         "border-slate-200 bg-white py-4 px-6 shadow-xs w-[450px] cursor-pointer border-l border-r",
-        isExpanded && " rounded-4xl border",
-        index === lastIndex && "rounded-b-4xl border-b",
-        index === 0 && "rounded-t-4xl border-t",
-        hasExpandedItem &&
-          expandedItem + 1 === index &&
-          "rounded-t-4xl border-t",
-        hasExpandedItem &&
-          expandedItem - 1 === index &&
-          "rounded-b-4xl border-b"
+        isExpanded && " border",
+        index === lastIndex && "border-b",
+        index === 0 && "border-t",
+        hasExpandedItem && expandedItem + 1 === index && "border-t",
+        hasExpandedItem && expandedItem - 1 === index && "border-b"
       )}
       initial={false}
       animate={{
         backgroundColor: isExpanded
           ? "rgb(248, 250, 252)"
           : "rgb(255, 255, 255)",
-
         marginTop: isExpanded ? (index === 0 ? "0px" : "16px") : "0px",
         marginBottom: isExpanded ? "16px" : "0px",
+        borderRadius: (() => {
+          if (isExpanded) {
+            return "36px";
+          }
+
+          let topRadius = "0px";
+          let bottomRadius = "0px";
+
+          if (index === 0 || (hasExpandedItem && expandedItem + 1 === index)) {
+            topRadius = "36px";
+          }
+
+          if (
+            index === lastIndex ||
+            (hasExpandedItem && expandedItem - 1 === index)
+          ) {
+            bottomRadius = "36px";
+          }
+
+          return `${topRadius} ${topRadius} ${bottomRadius} ${bottomRadius}`;
+        })(),
       }}
       transition={{
         type: "spring",
-        damping: 9,
-        stiffness: 150,
+        damping: 10,
+        stiffness: 100,
         mass: 1.5,
       }}
     >
